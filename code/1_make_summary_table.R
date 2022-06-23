@@ -4,7 +4,7 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 source("prelim_plot.R")
 
 ## load data ----
-dat_xc_county <- read_rds(file = "../final_data/fitted_and_actual_deaths_county_sets_2020_W2020_wash_6_3_countyrow.rds")
+dat_xc_county <- read_csv(here::here("raw_data/2022_all_cause_mortality_provisional.csv"))
 dat_xc_county <- dat_xc_county %>%
   group_by(state, cs_name) %>%
   mutate(metroname_mode = Mode(metroname))
