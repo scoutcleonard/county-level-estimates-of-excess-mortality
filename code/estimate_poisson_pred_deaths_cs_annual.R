@@ -6,6 +6,7 @@ library(ggplot2)
 library(data.table)
 library(stringr)
 library(sandwich)
+library(here)
 
 #Set path to main folder
 main_file_path <- "..."
@@ -16,14 +17,16 @@ libout <- paste0(main_file_path,'/final_data')
 
 #-------------------------------------------------------------------------
 #Utility Functions and External Macors
-any_in <- function(egg,nest){ifelse(sum(egg %in% nest) > 0,1,0)}
+any_in <- function(egg, nest){
+  ifelse(sum(egg %in% nest) > 0, 1, 0)
+  }
 
 #Misc Functions
-source(paste0(main_file_path,'/macros/ackley_funs.R'))
+source(here("code/ackley_funs.R")) #paste0(main_file_path,'/macros/ackley_funs.R'))
 
 #This is a modification of the add_pi function in ciTools which uses robust standard errors
 #See https://cran.r-project.org/web/packages/ciTools/vignettes/ciTools-glm-vignette.html
-source(paste0(main_file_path,'/macros/sim_glm_robust_fun.R')) 
+source(here("code/sim_glm_robust_fun.R")) #paste0(main_file_path,'/macros/sim_glm_robust_fun.R')) 
 
 
 #-------------------------------------------------------------------------
@@ -32,20 +35,24 @@ source(paste0(main_file_path,'/macros/sim_glm_robust_fun.R'))
 
 #-------------------------------------------------------------------------
 #Import analysis data
-setwd(libin)
+#setwd(libin)
 
-dat <- read.csv(file= 'county_set_analysis_data_2011_2019_W2020_wash_6_3.csv', stringsAsFactors = FALSE)
+dat <- read.csv(here('final_data/county_set_analysis_data_2011_2019_W2020_wash_6_3.csv', stringsAsFactors = FALSE))
 #-------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
 base_year <- 1998
+
 dat_edit <- dat %>% filter(year >= 2011, !is.na(cs_code)) %>%
   mutate(time = year - base_year, #Normalize time to 1999=1
          time_orig_vals = time)
+
 dat_edit <- dat_edit %>% arrange(cs_code,year)
+
 dat_est <- dat_edit %>% filter(year < 2020) 
+
 dat_2020 <- dat_edit %>% filter(year == 2020)
 
 

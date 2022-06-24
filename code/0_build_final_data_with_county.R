@@ -72,4 +72,5 @@ dat_xc <- dat_xc %>%
     )
   )
 
-saveRDS(dat_xc, file = "../final_data/provisional_2022_countyrow.rds")
+write_csv(dat_xc, file = "../final_data/provisional_2022_countyrow.csv")
+

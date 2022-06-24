@@ -4,13 +4,13 @@ setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 source("prelim_plot.R")
 
 ## load data ----
-dat_xc_county <- read_csv(here::here("raw_data/2022_all_cause_mortality_provisional.csv"))
+dat_xc_county <- read_csv(here::here("final_data/provisional_2022_countyrow.csv"))
 dat_xc_county <- dat_xc_county %>%
-  group_by(state, cs_name) %>%
+  group_by(state, county_code) %>%
   mutate(metroname_mode = Mode(metroname))
 dat_xc_countyset <- dat_xc_county %>%
-  distinct(state, cs_name, .keep_all = TRUE) %>%
-  select(-county_code, -county_fips, -county_name, -metroname)
+  distinct(state, county_name, .keep_all = TRUE) %>%
+  select(-county_code, -metroname)
 
 negative_excess_death <- dat_xc_countyset %>%
   filter(excess_deaths_2020 < 0)
