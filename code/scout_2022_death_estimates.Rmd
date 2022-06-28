@@ -77,7 +77,7 @@ num_counties_dat_500
 #arrange/order counties by name and year
 dat_est <- dat_edit %>% arrange(county, year)
 
-dat_est <- dat_est %>% filter(year < 2020)
+dat_est <- dat_est %>% filter(year < 2022)
 ```
 
 # Model
@@ -87,7 +87,7 @@ dat_est <- dat_est %>% filter(year < 2020)
 Fit a generalized linear model to the county-level all cause mortality data: 
 
 ```{r}
-fit <- glm(deaths ~ offset(log(population/1000)) +
+fit <- glm(deaths ~ offset(log(exposure)) +
              death_rate_lag1 +
              time +
              time*factor(county_code),
