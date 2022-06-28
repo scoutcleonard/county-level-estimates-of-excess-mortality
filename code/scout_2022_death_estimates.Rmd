@@ -38,10 +38,6 @@ source(here("code/sim_glm_robust_fun.R"))
 
 # Import Data
 
-## 2011 - 2019 Data
-
-### Import
-
 ```{r}
 dat <- read.csv(here('raw_data/acm_2011-2022.csv')) %>% 
   mutate(county_code = if_else(str_length(county_code) == 4,
