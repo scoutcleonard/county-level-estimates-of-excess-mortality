@@ -80,7 +80,7 @@ num_counties_dat_500
 #arrange/order counties by name and year
 dat_est <- dat_edit %>% arrange(county, year)
 
-dat_est <- dat_est %>% filter(year < 2022)
+dat_est <- dat_est %>% filter(year < 2021)
 ```
 
 # Model
