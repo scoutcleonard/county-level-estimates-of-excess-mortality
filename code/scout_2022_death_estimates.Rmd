@@ -170,7 +170,7 @@ sim_response_mat <- matrix(NA, ncol = nsims, nrow = npreds)
 #This is a modification of the add_pi function in ciTools which uses robust standard errors
 #See https://cran.r-project.org/web/packages/ciTools/vignettes/ciTools-glm-vignette.html for complete details
 sim_coefs <- sim_glm_robust(fit, n.sims = nsims, ses = clust_ses)
-save(sim_coefs, file = 'estimated_poisson_glm_simulated_coefs.rda')
+save(sim_coefs, file = 'rda/estimated_poisson_glm_simulated_coefs.rda')
 ```
 
 ```{r}
