@@ -1,0 +1,132 @@
+---
+title: "Estimate Poisson Predicated Deaths for 2022"
+author: "Scout Leonard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries 
+
+```{r}
+#install and load librarian package if needed 
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+# load packages
+shelf(tidyr,
+      dplyr,
+      ggplot2,
+      data.table,
+      stringr,
+      sandwich,
+      here,
+      usmap)
+
+#source functions
+##misc functions
+source(here("code/ackley_funs.R"))
+##This is a modification of the add_pi function in ciTools which uses robust standard errors
+##See https://cran.r-project.org/web/packages/ciTools/vignettes/ciTools-glm-vignette.html
+source(here("code/sim_glm_robust_fun.R")) 
+```
+
+# Import Data
+
+## 2011 - 2019 Data
+
+### Import
+
+```{r}
+dat <- read.csv(here('raw_data/acm_2011-2019.csv'))
+```
+
+### Conduct Edits 
+
+```{r}
+base_year <- 1998
+
+dat_edit <- dat %>% 
+  filter(year >= 2011, !is.na(county)) %>%
+  mutate(time = year - base_year, #Normalize time to 1999 = 1
+         time_orig_vals = time)
+```
+
+```{r}
+#take the mean population over the 8 yrs represented 
+dat_500 <- dat_edit %>% 
+  group_by(county_code) %>% 
+  summarize(mean_pop = mean(population)) %>% 
+  ungroup()
+
+#subset the top 500 most populous counties 
+dat_500 <- dat_500[order(dat_500$mean_pop, decreasing = TRUE),]
+dat_500 <- dat_500[1:500,]
+dat_edit <- subset(dat_edit, county_code %in% dat_500$county_code)
+
+#check to see that 500 unique counties are represented
+num_counties_dat_500 <- length(unique(dat_edit$county_code))
+num_counties_dat_500
+```
+
+```{r}
+#arrange/order counties by name and year
+dat_est <- dat_edit %>% arrange(county, year)
+```
+
+# Model
+
+## Write Model
+
+Fit a generalized linear model to the county-level all cause mortality data: 
+
+```{r}
+fit <- glm(deaths ~ offset(log(population/1000)) +
+             death_rate_lag1 +
+             time +
+             time*factor(county_code),
+           family = quasipoisson(link = "log"),
+           data = dat_est)
+```
+
+## Save Output
+
+Save output to `rda` directory of repo (this was added to the .gitignore):
+
+```{r}
+if(1==1){
+  save(fit, file = here('rda/estimated_poisson_glm_parameters.rda'))
+}
+```
+
+## Compare Cluster-Robust Errors
+
+```{r}
+vmat_rob <- vcovCL(fit, cluster = ~ county_code)
+clust_ses <- sqrt(diag(vmat_rob)) #produces warning: NAs produced 
+
+#save to rda directory
+if(1==1){
+  save(clust_ses, file = here('rda/estimated_poisson_glm_ses.rda'))
+}
+```
+
+## Predict
+
+```{r}
+dat_est <- dat_est %>%
+  mutate(fitted_deaths_all_yrs = exp(predict.glm(fit, dat_est)),
+         fitted_death_rate_all_yrs = fitted_deaths_all_yrs / (population / 1000))
+```
+
+# EDA
+
+```{r}
+
+```
+

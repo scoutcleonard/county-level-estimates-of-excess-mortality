@@ -1,0 +1,81 @@
+---
+title: "ACM Data Preprocessing"
+author: "Scout Leonard"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load Libraries 
+
+```{r}
+#install and load librarian package if needed 
+if (!require(librarian)) {
+  install.packages("librarian")
+  library(librarian)
+}
+
+# load packages
+shelf(tidyverse,
+      here,
+      janitor)
+```
+
+# Read in Data
+
+## 2011 - 2019 All Cause Mortality
+
+```{r}
+acm_2011_2019 <- read.delim2(here("raw_data/acm_2011-2019.txt")) %>% 
+  clean_names() %>% 
+  select(-c(notes)) %>% 
+  separate(county, into = c("county", "state"), sep = ", ") %>% 
+  group_by(county_code) %>% 
+  mutate(death_rate_lag1 = lag(crude_rate, n = 1, default = NA)) %>% 
+  ungroup() %>% 
+  mutate(county_code = if_else(str_length(county_code) == 4,
+                        str_c("0", as.character(county_code)),
+                        as.character(county_code))) %>% 
+  write_csv(file.path(here("raw_data/acm_2011-2019.csv")))
+```
+
+
+## 2020 All Cause Mortality 
+
+```{r}
+
+```
+
+
+## 2021 All Cause Mortality
+
+```{r}
+acm_2021 <- read.delim2(here("raw_data/acm_2021.txt")) %>% 
+  clean_names() %>% 
+  select(-c(notes)) %>% 
+  separate(residence_county, into = c("county", "state"), sep = ", ") %>% 
+  rename("county_code" = residence_county_code) %>% 
+  mutate(year = "2021") %>% 
+  mutate(county_code = if_else(str_length(county_code) == 4,
+                        str_c("0", as.character(county_code)),
+                        as.character(county_code)))
+```
+
+
+## 2022 All Cause Mortality 
+
+```{r}
+acm_2022 <- read.delim2(here("raw_data/acm_2022.txt")) %>% 
+  clean_names() %>% 
+  select(-c(notes)) %>% 
+  separate(residence_county, into = c("county", "state"), sep = ", ") %>% 
+  rename("county_code" = residence_county_code) %>% 
+  mutate(year = "2022") %>% 
+  mutate(county_code = if_else(str_length(county_code) == 4,
+                        str_c("0", as.character(county_code)),
+                        as.character(county_code)))
+```
+
