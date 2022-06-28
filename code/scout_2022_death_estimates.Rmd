@@ -43,7 +43,10 @@ source(here("code/sim_glm_robust_fun.R"))
 ### Import
 
 ```{r}
-dat <- read.csv(here('raw_data/acm_2011-2019.csv'))
+dat <- read.csv(here('raw_data/acm_2011-2019.csv')) %>% 
+  mutate(county_code = if_else(str_length(county_code) == 4,
+                        str_c("0", as.character(county_code)),
+                        as.character(county_code)))
 ```
 
 ### Conduct Edits 
@@ -127,6 +130,26 @@ dat_est <- dat_est %>%
 # EDA
 
 ```{r}
+years_list <- unique(dat_est$year)
 
+dat_est <- dat_est %>% 
+  rename(fips = "county_code")
+
+plot_by_year <- function(dat_est, year) {
+  #filter data by year
+  dat_est_year <- dat_est %>% 
+    filter(year == year)
+  
+  #plot choropleth map
+  plot_usmap(data = dat_est,
+             regions = "counties",
+             values = "fitted_deaths_all_yrs")
+}
+
+for (i in length(years_list)) {
+  plot_by_year(dat_est = dat_est, year = years_list[i])
+}
+
+plot_by_year(dat_est = dat_est, year = 2018)
 ```
 
