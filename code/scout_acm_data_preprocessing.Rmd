@@ -33,20 +33,26 @@ acm_2011_2019 <- read.delim2(here("raw_data/acm_2011-2019.txt")) %>%
   clean_names() %>% 
   select(-c(notes)) %>% 
   separate(county, into = c("county", "state"), sep = ", ") %>% 
-  group_by(county_code) %>% 
-  mutate(death_rate_lag1 = lag(crude_rate, n = 1, default = NA)) %>% 
-  ungroup() %>% 
   mutate(county_code = if_else(str_length(county_code) == 4,
                         str_c("0", as.character(county_code)),
-                        as.character(county_code))) %>% 
-  write_csv(file.path(here("raw_data/acm_2011-2019.csv")))
+                        as.character(county_code))) %>%
+  select(-c("year_code")) #%>% 
+  # write_csv(file.path(here("raw_data/acm_2011-2019.csv")))
 ```
 
 
 ## 2020 All Cause Mortality 
 
 ```{r}
-
+acm_2020 <- read.delim2(here("raw_data/acm_2020.txt")) %>% 
+  clean_names() %>% 
+  select(-c(notes)) %>% 
+  separate(residence_county, into = c("county", "state"), sep = ", ") %>% 
+  rename("county_code" = residence_county_code) %>% 
+  mutate(year = "2020") %>% 
+  mutate(county_code = if_else(str_length(county_code) == 4,
+                        str_c("0", as.character(county_code)),
+                        as.character(county_code)))
 ```
 
 
@@ -77,5 +83,18 @@ acm_2022 <- read.delim2(here("raw_data/acm_2022.txt")) %>%
   mutate(county_code = if_else(str_length(county_code) == 4,
                         str_c("0", as.character(county_code)),
                         as.character(county_code)))
+```
+
+# Combine Datasets and Calculate Lag
+
+```{r}
+acm_2011_2022 <- rbind(acm_2011_2019,
+                       acm_2020,
+                       acm_2021,
+                       acm_2022) %>% 
+  group_by(county_code) %>% 
+  mutate(death_rate_lag1 = lag(crude_rate, n = 1, default = NA)) %>% 
+  ungroup() %>% 
+  write_csv(file.path(here("raw_data/acm_2011-2022.csv")))
 ```
 
