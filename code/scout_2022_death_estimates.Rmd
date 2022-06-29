@@ -51,7 +51,7 @@ dat <- read.csv(here('raw_data/acm_2011-2022.csv')) %>%
 ### Conduct Edits 
 
 ```{r}
-base_year <- 1998
+base_year <- 2011
 
 dat_edit <- dat %>% 
   filter(year >= 2011, !is.na(county)) %>%
@@ -83,6 +83,14 @@ dat_est <- dat_edit %>% arrange(county, year)
 dat_est <- dat_est %>% filter(year < 2022)
 ```
 
+```{r}
+lapply(dat_est, class)
+
+dat_est <- dat_est %>% 
+  mutate(death_rate_lag1 = as.numeric(death_rate_lag1)) %>% 
+  mutate(crude_rate = as.numeric(crude_rate))
+```
+
 # Model
 
 ## Write Model
@@ -92,7 +100,6 @@ Fit a generalized linear model to the county-level all cause mortality data:
 ```{r}
 fit <- glm(deaths ~ offset(log(exposure)) +
              death_rate_lag1 +
-             time +
              time*factor(county_code),
            family = quasipoisson(link = "log"),
            data = dat_est)
@@ -112,7 +119,7 @@ if(1 == 1){
 
 ```{r}
 vmat_rob <- vcovCL(fit, cluster = ~ county_code)
-clust_ses <- sqrt(diag(vmat_rob)) #produces warning: NAs produced 
+clust_ses <- sqrt(diag(vmat_rob)) 
 
 #save to rda directory
 if(1 == 1){
@@ -147,7 +154,8 @@ dat_2021 <- dat_2021 %>%
 
 #2022
 dat_2022 <- dat_edit %>% 
-  filter(year == "2022")
+  filter(year == "2022") %>% 
+  mutate(death_rate_lag1 = as.numeric(death_rate_lag1))
 
 dat_2022 <- dat_2022 %>%
   mutate(fitted_deaths_2022 = exp(predict.glm(fit, dat_2022)),
