@@ -93,9 +93,9 @@ acm_2011_2022 <- rbind(acm_2011_2019,
                        acm_2021,
                        acm_2022) %>% 
   group_by(county_code) %>% 
-  mutate(death_rate_lag1 = lag(crude_rate, n = 1, default = NA)) %>% 
+  mutate(death_rate_lag1 = lag(crude_rate, n = 1, default = NA),
+         total_deaths_lag1 = lag(deaths, n = 1, defailt = NA)) %>% 
   ungroup() %>% 
-  mutate(exposure = population / 1000) %>% 
+  mutate(exposure = population / 100000) %>% 
   write_csv(file.path(here("raw_data/acm_2011-2022.csv")))
 ```
-
